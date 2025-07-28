@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF to Audiobook</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #ffd1dc, #ffe4ec);
+      text-align: center;
+      padding: 30px;
+      color: #8b005d;
+    }
+    h1 {
+      font-size: 3.5em;
+      color: #fa2a9cff;
+    }
+    form {
+      margin-top: 60px;
+      background-color: #fff0f5;
+      padding: 30px;
+      border-radius: 25px;
+      box-shadow: 0 0 20px rgba(255, 182, 193, 0.5);
+      display: inline-block;
+    }
+    input[type="file"] {
+      padding: 30px;
+      border-radius: 8px;
+      border: 1px solid #ffb6c1;
+      background: #fff5fa;
+    }
+    button {
+      background-color: #ff69b4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 25px;
+    }
+    button:hover {
+      background-color: #ff1493;
+    }
+    #message, #downloadLink, #progress {
+      margin-top: 30px;
+      font-size: 2.6em;
+    }
+  </style>
+</head>
+<body>
+  <h1>📘 Convert Your PDF to Audiobook 🎧</h1>
+  <form id="uploadForm">
+    <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required>
+    <br><br>
+    <button type="submit">Convert</button>
+  </form>
+  <div id="progress"></div>
+  <div id="message"></div>
+  <div id="downloadLink"></div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const message = document.getElementById('message');
+    const progress = document.getElementById('progress');
+    const downloadLink = document.getElementById('downloadLink');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      message.innerText = '';
+      downloadLink.innerHTML = '';
+
+      const fileInput = document.getElementById('pdfFile');
+      const formData = new FormData();
+      formData.append('pdfFile', fileInput.files[0]);
+
+      progress.innerText = '🔄 Converting, please wait...';
+
+      fetch('/convert', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          progress.innerText = '✅ Conversion Complete!';
+          message.innerText = 'Here is your downloaded file:';
+          downloadLink.innerHTML = `<a href="${data.file_url}" download style="color: #ff1493; font-weight: bold;">🎧 Download Audiobook</a>`;
+        } else {
+          progress.innerText = '❌ Conversion failed';
+          message.innerText = data.error;
+        }
+      })
+      .catch(err => {
+        progress.innerText = '❌ Conversion failed';
+        message.innerText = err.message;
+      });
+    });
+  </script>
+</body>
+</html>
